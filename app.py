@@ -673,7 +673,7 @@ class AnthropicOCR:
         
         # Create the message with image
         message = self.client.messages.create(
-            model='claude-3-7-sonnet-latest',
+            model='claude-4-sonnet-2025051',
             max_tokens=4000,
             messages=[
                 {
