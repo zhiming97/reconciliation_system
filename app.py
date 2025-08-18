@@ -642,29 +642,27 @@ class AnthropicOCR:
             JSON string of the extracted table data
         """
         
-        prompt = """The attached image is a screenshot of bank transaction history. Please extract ALL data from the table and return it as a JSON array of objects. 
-                
-                Requirements:
-                1. Each row should be a JSON object
-                2. Use the column headers as JSON keys
-                3. Be extremely accurate with financial data.
-                4. Do not hallucinate or use previous memory of other images uploaded to return the result. Always return whatever that is displayed to you in the image ONLY
-                5. For event time column, convert the data into the format of YYYY-MM-DD.
-                6. The image may have colours. Please perform some pre-processing before you perform OCR to achieve best accuracy.
+        prompt = """
+        Please extract ALL data from this table image and return it as a JSON array of objects.
+        
+        Requirements:
+        1. Each row should be a JSON object
+        2. Use the column headers as JSON keys
+        3. Be extremely accurate with financial data.
+        4. Do not hallucinate or use previous memory of other images uploaded to return the result. Always return whatever that is displayed to you in the image ONLY
+        5. For event time column, convert the data into the format of YYYY-MM-DD.
+        6. The image may have colours. Please perform some pre-processing before you perform OCR to achieve best accuracy.
+        
+        Return ONLY the JSON array, no explanations or additional text.
+        Example format:
+        [
+            {"column1": "value1", "column2": 123.45, "column3": "2025-08-14"},
+            {"column1": "value2", "column2": 678.90, "column3": "2025-08-15"}
+        ]
 
-                From the json array, if the column such as Credit, Deposit, Money In are not null or empty, put these transactions under "Deposit" in a column called transaction type. Otherwise, put the transaction under "Transfer" in the transaction type column.
-                        
-
-
-                Return ONLY the JSON array, no explanations or additional text.
-                Example format:
-                [
-                    {"column1": "value1", "column2": 123.45, "column3": "2025-08-14"},
-                    {"column1": "value2", "column2": 678.90, "column3": "2025-08-15"}
-                ]
-
-                 IMPORTANT Thing : Only return the data of these 4 columns only: Transaction Type, Event Time, Amount, Description/Remarks
-                """
+        From the json array, separate the transactions by Deposit or Transfer. If the row has data under the Credit, Deposit or Money In column, then that row is considered as Deposit. Else, the row is considered as Transfer.
+        Help me to paraphrase the existing column headers into 3 columns only : Event Time , Amount, Description/Remarks. Then, add another column called "Transaction Type" and populate it with Deposit or Transfer according to the logic just now.
+        """
 
 
         # Encode the image properly using the file object
