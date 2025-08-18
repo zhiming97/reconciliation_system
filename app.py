@@ -444,9 +444,11 @@ def main():
                                 column_config={
                                     "Date_A": st.column_config.TextColumn("Date_A", width="medium"),
                                     "Description_A": st.column_config.TextColumn("Description_A", width="large"),
+                                    "Type_A": st.column_config.TextColumn("Type_A", width="small"),
                                     "Amount_A": st.column_config.NumberColumn("Amount_A", width="medium", format="%.2f"),
                                     "Date_B": st.column_config.TextColumn("Date_B", width="medium"),
                                     "Description_B": st.column_config.TextColumn("Description_B", width="large"),
+                                    "Type_B": st.column_config.TextColumn("Type_B", width="small"),
                                     "Amount_B": st.column_config.NumberColumn("Amount_B", width="medium", format="%.2f"),
                                     "Status": st.column_config.TextColumn("Status", width="small"),
 
@@ -571,7 +573,7 @@ class AnthropicOCR:
         """
         
         prompt = """
-        Please extract ALL data from this table image and return it as a JSON array of objects. 
+        The attached image contains a structured table. Please extract ALL data from the table and return it as a JSON array of objects. 
         
         Requirements:
         1. Each row should be a JSON object
@@ -579,14 +581,14 @@ class AnthropicOCR:
         3. Be extremely accurate with financial data.
         4. Do not hallucinate or use previous memory of other images uploaded to return the result. Always return whatever that is displayed to you in the image ONLY
         5. For event time column, convert the data into the format of YYYY-MM-DD.
-        6. Only return the rows where the "Transaction Type" is "Deposit".
-        7. Only return the data of these 3 columns only: Event Time, Amount, Remark
+        6. Only return the rows where the "Transaction Type" is "Deposit" or "Transfer".
+        7. Only return the data of these 4 columns only: Transaction Type, Event Time, Amount, Remark
         
         Return ONLY the JSON array, no explanations or additional text.
         Example format:
         [
-            {"column1": "value1", "column2": 123.45, "column3": "2025-08-14"},
-            {"column1": "value2", "column2": 678.90, "column3": "2025-08-15"}
+            {"column1": "value1", "column2": 123.45, "column3": "2025-08-14", "column4": "Deposit"},
+            {"column1": "value2", "column2": 678.90, "column3": "2025-08-15", "column4": "Transfer"}
         ]
         """
         
@@ -640,27 +642,27 @@ class AnthropicOCR:
             JSON string of the extracted table data
         """
         
-        prompt = """
-        Please extract ALL data from this table image and return it as a JSON array of objects.
-        
-        Requirements:
-        1. Each row should be a JSON object
-        2. Use the column headers as JSON keys
-        3. Be extremely accurate with financial data.
-        4. Do not hallucinate or use previous memory of other images uploaded to return the result. Always return whatever that is displayed to you in the image ONLY
-        5. For event time column, convert the data into the format of YYYY-MM-DD.
-        6. The image may have colours. Please perform some pre-processing before you perform OCR to achieve best accuracy.
-        
-        Return ONLY the JSON array, no explanations or additional text.
-        Example format:
-        [
-            {"column1": "value1", "column2": 123.45, "column3": "2025-08-14"},
-            {"column1": "value2", "column2": 678.90, "column3": "2025-08-15"}
-        ]
+        prompt = """The attached image is a screenshot of bank transaction history. Please extract ALL data from the table and return it as a JSON array of objects. 
+                
+                Requirements:
+                1. Each row should be a JSON object
+                2. Use the column headers as JSON keys
+                3. Be extremely accurate with financial data.
+                4. Do not hallucinate or use previous memory of other images uploaded to return the result. Always return whatever that is displayed to you in the image ONLY
+                5. For event time column, convert the data into the format of YYYY-MM-DD.
+                6. The image may have colours. Please perform some pre-processing before you perform OCR to achieve best accuracy.
 
-        From the json array, filter out the transactions that are considered as deposit by looking for keywords in the column name such as Credit, Deposit, Money In. If these columns are not null, then include them, else exclude them. Also, help me to paraphrase the column headers into 3 columns only : Event Time , Amount, Description/Remarks.
-        """
-        
+                Help me to paraphrase the column headers into 4 columns only : Event Time , Amount, Description/Remarks , Transaction Type (Either Deposit or Transfer). From the json array, look for keywords in the column name such as Credit, Deposit, Money In. If these columns are not null, then put these transactions under the "Deposit" transaction type. Otherwise, put the transaction under "Transfer"
+                
+
+                Return ONLY the JSON array, no explanations or additional text.
+                Example format:
+                [
+                    {"column1": "value1", "column2": 123.45, "column3": "2025-08-14"},
+                    {"column1": "value2", "column2": 678.90, "column3": "2025-08-15"}
+                ]
+                """
+
         # Encode the image properly using the file object
         base64_image = self.encode_image_from_file(uploaded_file)
         
@@ -718,21 +720,25 @@ class AnthropicOCR:
         Debug helper to see what Claude is actually seeing
         Simulates pasting image directly on Claude website
         """
-        prompt = """You are looking at a bank statement table. Please visual it in a table format and darken the borders before analyzing it to improve accuracy. Please return the result in a JSON Format only.
+        prompt = """The attached image is a screenshot of bank transaction history. Please extract ALL data from the table and return it as a JSON array of objects. 
+        
+        Requirements:
+        1. Each row should be a JSON object
+        2. Use the column headers as JSON keys
+        3. Be extremely accurate with financial data.
+        4. Do not hallucinate or use previous memory of other images uploaded to return the result. Always return whatever that is displayed to you in the image ONLY
+        5. For event time column, convert the data into the format of YYYY-MM-DD.
+        6. The image may have colours. Please perform some pre-processing before you perform OCR to achieve best accuracy.
 
+        Help me to paraphrase the column headers into 4 columns only : Event Time , Amount, Description/Remarks , Transaction Type (Either Deposit or Transfer). From the json array, look for keywords in the column name such as Credit, Deposit, Money In. If these columns are not null, then put these transactions under the "Deposit" transaction type. Otherwise, put the transaction under "Transfer"
         
-        ⚠️ Important rules:
 
-        1. Always use the exact column values as they appear. 
-        - If a number appears under the "Deposit (MYR)" column, record it in the `"deposit"` field. 
-        - If a number appears under the "Withdrawal (MYR)" column, record it in the `"withdrawal"` field. 
-        - Never infer whether a transaction is a deposit or withdrawal from the description or reference text.
-        2. If a cell is empty in the source table, set the corresponding JSON field to `null`.
-        3. Do not swap values between deposit and withdrawal.
-        4. Do not interpret semantics (e.g., "Loan Payment" ≠ withdrawal unless the withdrawal column has a value).
-        5. Ensure amounts are numeric values (e.g., `1100.00`) not strings.
-        
-        
+        Return ONLY the JSON array, no explanations or additional text.
+        Example format:
+        [
+            {"column1": "value1", "column2": 123.45, "column3": "2025-08-14"},
+            {"column1": "value2", "column2": 678.90, "column3": "2025-08-15"}
+        ]
         """
         
         # Encode the image directly from the uploaded file (no processing)
@@ -743,7 +749,7 @@ class AnthropicOCR:
         
         # Create the message with image
         message = self.client.messages.create(
-            model="claude-3-5-haiku-latest",
+            model="claude-sonnet-4-20250514",
             max_tokens=4000,
             messages=[
                 {
