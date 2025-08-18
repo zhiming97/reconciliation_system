@@ -663,7 +663,7 @@ class AnthropicOCR:
                     {"column1": "value2", "column2": 678.90, "column3": "2025-08-15"}
                 ]
 
-                 IMPORTANT Thing : Only return the data of these 4 columns only: Transaction Type, Event Time, Amount, Remark
+                 IMPORTANT Thing : Only return the data of these 4 columns only: Transaction Type, Event Time, Amount, Description/Remarks
                 """
 
 
