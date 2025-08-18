@@ -345,7 +345,7 @@ def main():
     
     with col2:
         ssbo_file, ssbo_uploaded = create_upload_section(
-            "💰 SSBO DEPOSITS", 
+            "💰 SSBO DEPOSITS SCREENSHOT ONLY", 
             "ssbo_deposit_uploader"
         )
         
