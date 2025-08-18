@@ -728,10 +728,7 @@ class AnthropicOCR:
         3. Be extremely accurate with financial data.
         4. Do not hallucinate or use previous memory of other images uploaded to return the result. Always return whatever that is displayed to you in the image ONLY
         5. For event time column, convert the data into the format of YYYY-MM-DD.
-        6. The image may have colours. Please perform some pre-processing before you perform OCR to achieve best accuracy.
-
-        Help me to paraphrase the column headers into 4 columns only : Event Time , Amount, Description/Remarks , Transaction Type (Either Deposit or Transfer). From the json array, look for keywords in the column name such as Credit, Deposit, Money In. If these columns are not null, then put these transactions under the "Deposit" transaction type. Otherwise, put the transaction under "Transfer"
-        
+        6. The image may have colours. Please perform some pre-processing before you perform OCR to achieve best accuracy.        
 
         Return ONLY the JSON array, no explanations or additional text.
         Example format:
