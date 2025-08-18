@@ -565,7 +565,8 @@ class AnthropicOCR:
         4. Do not hallucinate or use previous memory of other images uploaded to return the result. Always return whatever that is displayed to you in the image ONLY
         5. For event time column, convert the data into the format of YYYY-MM-DD.
         6. Only return the rows where the "Transaction Type" is "Deposit" or "Transfer".
-        7. Only return the data of these 4 columns only: Transaction Type, Event Time, Amount, Remark
+        7. Only return the data of these 4 columns only: Transaction Type, Event Time, Amount, Remark.
+        8. Convert the image into grayscale before performing OCR to ensure accuracy.
         
         Return ONLY the JSON array, no explanations or additional text.
         Example format:
