@@ -7,6 +7,7 @@ import json
 import base64
 import re
 import cv2
+import io
 
 # -------------------------------
 # Configuration
@@ -522,6 +523,7 @@ class AnthropicOCR:
 
     def encode_image_from_file(self, uploaded_file) -> str:
         try:
+            # Read file content
             file_content = uploaded_file.getbuffer()
             
             if hasattr(file_content, 'tobytes'):
@@ -529,12 +531,18 @@ class AnthropicOCR:
             elif not isinstance(file_content, bytes):
                 file_content = bytes(file_content)
             
-            nparr = np.frombuffer(file_content, np.uint8)
-            # Load directly as grayscale - more efficient!
-            gray_image = cv2.imdecode(nparr, cv2.IMREAD_GRAYSCALE)
+            # Open image with PIL
+            image = Image.open(io.BytesIO(file_content))
             
-            _, buffer = cv2.imencode('.png', gray_image)
-            base64_data = base64.b64encode(buffer).decode('utf-8')
+            # Convert to grayscale
+            gray_image = image.convert('L')
+            
+            # Save as PNG to buffer
+            buffer = io.BytesIO()
+            gray_image.save(buffer, format='PNG')
+            
+            # Encode to base64
+            base64_data = base64.b64encode(buffer.getvalue()).decode('utf-8')
             
             uploaded_file._detected_media_type = "image/png"
             return base64_data
@@ -588,7 +596,7 @@ class AnthropicOCR:
         
         # Create the message with image
         message = self.client.messages.create(
-            model="claude-sonnet-4-20250514",
+            model="claude-3-5-haiku-latest",
             max_tokens=4000,
             messages=[
                 {
