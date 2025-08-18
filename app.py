@@ -520,28 +520,28 @@ class AnthropicOCR:
             # Default to PNG if we can't detect
             return "image/png"
 
-def encode_image_from_file(self, uploaded_file) -> str:
-    try:
-        file_content = uploaded_file.getbuffer()
-        
-        if hasattr(file_content, 'tobytes'):
-            file_content = file_content.tobytes()
-        elif not isinstance(file_content, bytes):
-            file_content = bytes(file_content)
-        
-        nparr = np.frombuffer(file_content, np.uint8)
-        # Load directly as grayscale - more efficient!
-        gray_image = cv2.imdecode(nparr, cv2.IMREAD_GRAYSCALE)
-        
-        _, buffer = cv2.imencode('.png', gray_image)
-        base64_data = base64.b64encode(buffer).decode('utf-8')
-        
-        uploaded_file._detected_media_type = "image/png"
-        return base64_data
-        
-    except Exception as e:
-        print(f"Error in encode_image_from_file: {str(e)}")
-        raise e
+    def encode_image_from_file(self, uploaded_file) -> str:
+        try:
+            file_content = uploaded_file.getbuffer()
+            
+            if hasattr(file_content, 'tobytes'):
+                file_content = file_content.tobytes()
+            elif not isinstance(file_content, bytes):
+                file_content = bytes(file_content)
+            
+            nparr = np.frombuffer(file_content, np.uint8)
+            # Load directly as grayscale - more efficient!
+            gray_image = cv2.imdecode(nparr, cv2.IMREAD_GRAYSCALE)
+            
+            _, buffer = cv2.imencode('.png', gray_image)
+            base64_data = base64.b64encode(buffer).decode('utf-8')
+            
+            uploaded_file._detected_media_type = "image/png"
+            return base64_data
+            
+        except Exception as e:
+            print(f"Error in encode_image_from_file: {str(e)}")
+            raise e
     
  
     def extract_table_as_json(self, uploaded_file) -> str:
