@@ -810,12 +810,29 @@ def create_comparison_table(bank_data, ssbo_data):
         except:
             return date_str
     
+    # Normalize amount for reliable matching
+    def normalize_amount(value):
+        try:
+            if isinstance(value, str):
+                value = value.replace(',', '').strip()
+            return float(value)
+        except Exception:
+            return value
+    
+    # Normalize transaction type (minimal normalization)
+    def normalize_tx_type(tx):
+        if tx is None:
+            return None
+        return str(tx).strip().lower()
+    
     # Create a lookup dictionary for SSBO data by standardized date and amount
     # Use a list to track multiple transactions with same date+amount
     ssbo_lookup = {}
     for ssbo_item in ssbo_data:
         standardized_date = standardize_date(ssbo_item['Event Time'])
-        key = (standardized_date, ssbo_item['Amount'])
+        normalized_amount = normalize_amount(ssbo_item['Amount'])
+        normalized_type = normalize_tx_type(ssbo_item.get('Transaction Type'))
+        key = (standardized_date, normalized_amount, normalized_type)
         if key not in ssbo_lookup:
             ssbo_lookup[key] = []
         ssbo_lookup[key].append(ssbo_item)
@@ -823,14 +840,16 @@ def create_comparison_table(bank_data, ssbo_data):
     # Process each bank statement entry
     for bank_item in bank_data:
         bank_date = bank_item['Event Time']
-        bank_amount = bank_item['Amount']
+        bank_amount = normalize_amount(bank_item['Amount'])
         bank_description = bank_item['Description/Remarks']
+        bank_tx_type = normalize_tx_type(bank_item.get('Transaction Type'))
+        bank_tx_display = bank_item.get('Transaction Type') or (bank_tx_type.capitalize() if bank_tx_type else 'Unknown')
         
         # Standardize the bank date for comparison
         standardized_bank_date = standardize_date(bank_date)
         
         # Check if there's a matching SSBO entry using standardized dates
-        ssbo_key = (standardized_bank_date, bank_amount)
+        ssbo_key = (standardized_bank_date, bank_amount, bank_tx_type)
         if ssbo_key in ssbo_lookup and len(ssbo_lookup[ssbo_key]) > 0:
             # Get the first available matching SSBO item
             ssbo_item = ssbo_lookup[ssbo_key].pop(0)  # Remove from available matches
@@ -843,9 +862,11 @@ def create_comparison_table(bank_data, ssbo_data):
         comparison_rows.append({
             'Date_A': bank_date,
             'Description_A': bank_description,
+            'Type_A': bank_tx_display,
             'Amount_A': bank_amount,
             'Date_B': ssbo_item['Event Time'] if status == "Tally" else "No match",
             'Description_B': ssbo_item['Remark'] if status == "Tally" else "No match",
+            'Type_B': ssbo_item['Transaction Type'] if status == "Tally" else "No match",
             'Amount_B': ssbo_item['Amount'] if status == "Tally" else "No match",
             'Status': status
         })
