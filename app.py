@@ -653,7 +653,8 @@ class AnthropicOCR:
                 6. The image may have colours. Please perform some pre-processing before you perform OCR to achieve best accuracy.
 
                 From the json array, if the column such as Credit, Deposit, Money In are not null or empty, put these transactions under "Deposit" in a column called transaction type. Otherwise, put the transaction under "Transfer" in the transaction type column.
-                
+                        
+
 
                 Return ONLY the JSON array, no explanations or additional text.
                 Example format:
@@ -661,7 +662,10 @@ class AnthropicOCR:
                     {"column1": "value1", "column2": 123.45, "column3": "2025-08-14"},
                     {"column1": "value2", "column2": 678.90, "column3": "2025-08-15"}
                 ]
+
+                 IMPORTANT Thing : Only return the data of these 4 columns only: Transaction Type, Event Time, Amount, Remark
                 """
+
 
         # Encode the image properly using the file object
         base64_image = self.encode_image_from_file(uploaded_file)
