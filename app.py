@@ -193,10 +193,7 @@ def load_custom_css():
         border-right: 1px solid rgba(0, 212, 255, 0.2) !important;
     }
     
-    /* Hide Streamlit branding */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
+
     
     /* Responsive design */
     @media (max-width: 768px) {
