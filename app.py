@@ -98,6 +98,8 @@ def load_custom_css():
         font-size: 1.1rem !important;
     }
     
+
+    
     /* Hide empty containers and default Streamlit elements */
     .stFileUploader > div[data-testid="stFileUploaderDropzone"]:empty {
         display: none !important;
@@ -279,19 +281,35 @@ def main():
         page_title="Bank Reconciliation System",
         page_icon="🏦",
         layout="wide",
-        initial_sidebar_state="collapsed"
+        initial_sidebar_state="expanded"
     )
     
     # Load custom CSS
     load_custom_css()
     
+    # Sidebar instructions
+    with st.sidebar:
+        st.markdown("### 📝 General Guidelines 📝")
+        st.markdown(
+            "1. Upload the **bank transaction screenshot** and the **SSBO transaction screenshot** at the designated sections\n"
+            "2. Click on the **""Initiate Reconciliation""** button once both of the screenshots are uploaded.\n"
+        )
+
+        st.markdown("### ❗ Things To Take Note ❗")
+        st.markdown(
+            "1. Ensure that the text in the screenshots are **readable** and the **text size is not too small**\n"
+            "2. The **headers** must always be included in both the bank transaction and the SSBO transactions screenshot.\n"
+            "3. The SSBO screenshot must always include columns such as **Event Time, Transaction Type, Amount**\n"
+            "4. Avoid including **more than 17 rows of transaction** in the screenshots."
+        )
+    
     # Main title
     st.markdown('''
     <div class="futuristic-title">
-         BANK STATEMENT RECONCILIATION SYSTEM
+         PAYMENT RECONCILIATION SYSTEM
     </div>
     <div class="futuristic-subtitle">
-        Identifying which deposits from the bank statement that are missing from SSBO
+        Identifying the transactions from the bank transaction history that are missing in SSBO.
     </div>
     ''', unsafe_allow_html=True)
     
@@ -306,7 +324,7 @@ def main():
     
     with col1:
         bank_file, bank_uploaded = create_upload_section(
-            "🏦 BANK STATEMENT", 
+            "🏦 BANK TRANSACTION SCREENSHOT", 
             "bank_statement_uploader"
         )
         
@@ -923,9 +941,6 @@ def process_ssbo_deposits_with_claude(uploaded_file) -> dict:
             'error': str(e),
             'data': None
         }
-
-
-
 
 
 
