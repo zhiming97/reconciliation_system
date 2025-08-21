@@ -290,6 +290,7 @@ def main():
         st.markdown(
             "1. Upload the **bank transaction screenshot** and the **SSBO transaction screenshot** at the designated sections\n"
             "2. Click on the **""Initiate Reconciliation""** button once both of the screenshots are uploaded.\n"
+            "3. The transactions that are not inside the SSBO will show as **'Not Tally'**."
         )
 
         st.markdown("### ❗ Things To Take Note ❗")
