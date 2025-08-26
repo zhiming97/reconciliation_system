@@ -332,33 +332,33 @@ def main():
             st.session_state.bank_statement_data = file_data
             st.success(f"📁 Processed: {file_data['name']} ({file_data['size']} bytes)")
             
-            # Add debug button to see what Claude sees (only for bank statement)
-            st.markdown("---")
-            if st.button("👁️ See What Claude Sees (Bank Statement)", key="debug_btn"):
-                with st.spinner("🔍 Analyzing what Claude sees..."):
-                    try:
-                        ocr = AnthropicOCR(ANTHROPIC_API_KEY)
-                        debug_response = ocr.debug_image_extraction(
-                            st.session_state.bank_statement_data['file_object']
-                        )
+            # # Add debug button to see what Claude sees (only for bank statement)
+            # st.markdown("---")
+            # if st.button("👁️ See What Claude Sees (Bank Statement)", key="debug_btn"):
+            #     with st.spinner("🔍 Analyzing what Claude sees..."):
+            #         try:
+            #             ocr = AnthropicOCR(ANTHROPIC_API_KEY)
+            #             debug_response = ocr.debug_image_extraction(
+            #                 st.session_state.bank_statement_data['file_object']
+            #             )
                         
-                        st.markdown("### 👁️ Raw Claude Analysis of Your Bank Statement")
-                        st.markdown("**This is exactly what Claude sees when looking at your image (simulating direct paste on Claude website):**")
+            #             st.markdown("### 👁️ Raw Claude Analysis of Your Bank Statement")
+            #             st.markdown("**This is exactly what Claude sees when looking at your image (simulating direct paste on Claude website):**")
                         
-                        # Show the raw response in a larger text area
-                        st.text_area(
-                            "Claude's Raw Description:", 
-                            debug_response, 
-                            height=400,
-                            help="This is the unprocessed, raw response from Claude about what it sees in your bank statement image"
-                        )
+            #             # Show the raw response in a larger text area
+            #             st.text_area(
+            #                 "Claude's Raw Description:", 
+            #                 debug_response, 
+            #                 height=400,
+            #                 help="This is the unprocessed, raw response from Claude about what it sees in your bank statement image"
+            #             )
                         
-                        # Show file info for context
-                        st.info(f"**File being analyzed:** {bank_file.name} ({bank_file.size} bytes) - Original quality preserved")
+            #             # Show file info for context
+            #             st.info(f"**File being analyzed:** {bank_file.name} ({bank_file.size} bytes) - Original quality preserved")
                         
-                    except Exception as e:
-                        st.error(f"❌ Debug error: {str(e)}")
-                        st.exception(e)
+            #         except Exception as e:
+            #             st.error(f"❌ Debug error: {str(e)}")
+            #             st.exception(e)
     
     with col2:
         ssbo_file, ssbo_uploaded = create_upload_section(
